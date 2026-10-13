@@ -1,0 +1,44 @@
+name: regression
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install simulators
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq iverilog verilator
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python deps
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -q -r requirements.txt
+
+      - name: Lint
+        run: make lint
+
+      - name: Regression (3 random seeds per project)
+        run: .venv/bin/python scripts/regress.py --seeds 3
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-logs
+          path: |
+            build/regress/
+            projects/*/build/**/*.log
+            projects/*/build/results.xml

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-vscode-remote.remote-wsl",
+    "mshr-h.veriloghdl",
+    "ms-python.python",
+    "editorconfig.editorconfig",
+    "github.vscode-github-actions"
+  ]
+}
