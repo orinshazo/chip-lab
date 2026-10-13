@@ -2,8 +2,9 @@
 
 [![regression](https://github.com/orinshazo/chip-lab/actions/workflows/regression.yml/badge.svg)](https://github.com/orinshazo/chip-lab/actions/workflows/regression.yml)
 
-Digital design and verification projects in SystemVerilog, verified with self-checking
-testbenches, Python/cocotb reference models, constrained-random stimulus and functional coverage.
+Computer architecture, digital design and verification projects: RTL in SystemVerilog, performance
+models in C++, and self-checking testbenches with Python/cocotb reference models, constrained-random
+stimulus and functional coverage.
 Every push runs the full regression in CI.
 
 ## Projects
@@ -13,8 +14,8 @@ Every push runs the full regression in CI.
 | [p00](projects/p00_counter) | Parameterized counter | Reference project: SV directed tb + cocotb model, random, coverage | ✅ |
 | [p01](projects/p01_sync_fifo) | Synchronous FIFO | Full/empty/overflow, scoreboard, coverage closure | 🚧 |
 
-Planned: UART, ALU with golden model, APB register block (UVM + SVA + formal), RV32I core with a
-C++ ISS in lockstep — see [ROADMAP.md](ROADMAP.md).
+Planned: UART, cache and branch-predictor simulators in C++, an RV32I pipeline verified in lockstep
+against a C++ ISS with performance counters, and architecture studies in ChampSim — see [ROADMAP.md](ROADMAP.md).
 
 ## Quick start (WSL2 Ubuntu 24.04)
 

@@ -1,112 +1,124 @@
-# Roadmap — Student to Verification-Ready (Oct 2026 → Jul 2027)
+# Roadmap — from fundamentals to computer architect
 
-**Goal:** apply for student positions in Design Verification (primary), CAD / Design
-Automation and Pre/Post-Silicon Validation (secondary) with a portfolio that proves it.
+**North star:** computer / SoC architect — the person who decides how a processor or system is
+built, models it before it exists, and can defend every trade-off with data.
 
-**Budget:** 4–6 hours/week, ~36 weeks ≈ 180 hours. Applications open from ~April 2027.
+**How this roadmap works**
 
-**Exit criteria** (what "ready" means on the day you apply):
+- **Levels, not dates.** Each level has an *exit test*. Pass it and move on, whether that took
+  one week or eight. There is no last level: the list keeps growing as you do.
+- **Depth over coverage.** A level is passed when you can rebuild the result from scratch and
+  explain every decision out loud, not when the code runs.
+- **Every level leaves an artifact** in this repo: code, tests, a short write-up with data.
+- **Career is a checkpoint, not the finish line.** Student applications open ~April 2027
+  with whatever level you have reached by then (target: Level 4+).
 
-- [ ] Can design and explain a FIFO, UART, FSM-based controller and pipelined datapath in SystemVerilog
-- [ ] Can build a self-checking, constrained-random testbench with a reference model, scoreboard and functional coverage
-- [ ] Can read and write SystemVerilog classes, constraints, covergroups and SVA; knows the UVM component structure
-- [ ] Owns a capstone (RV32I core) verified against a C++ reference model, with nightly-style regression in CI
-- [ ] Comfortable in Python for tooling: argparse, subprocess, regex, file/log parsing, pytest
-- [ ] Has answered every item in [`docs/interview-prep.md`](docs/interview-prep.md) out loud at least once
-
----
-
-## Weekly rhythm (≈5 h)
-
-| Slot | Time | What |
-|------|------|------|
-| Theory | 1.5 h | Read / watch the week's topic, take notes in `LOG.md` |
-| Build ×2 | 3 h | Two focused sessions on the current project (spec → RTL → TB → regress) |
-| Review | 0.5 h | Commit, update `LOG.md`, tick the checklist below, plan next week |
-
-During Technion exam periods (≈ late Jan–Feb, ≈ July) switch to **maintenance mode**:
-1 h/week of interview questions only. The schedule below already has buffer weeks for this.
+**Target roles, in order:** Architecture / Performance-modeling student → Design Verification
+student → Validation / Emulation student. All three lead to architecture; the first is the most direct.
 
 ---
 
-## Phase 0 — Setup (Week 1)
+## Level 0 — Foundations
 
-- [ ] Run `scripts/setup_wsl.sh`, then `make doctor` and `make test` — all green
-- [ ] Create a GitHub repo `chip-lab`, push, confirm the CI badge is green
-- [ ] Open a waveform of `p00_counter` in GTKWave (`make -C projects/p00_counter waves`)
-- [ ] Read `docs/workflow.md` and `docs/conventions.md` end to end
-- [ ] Read every file in `projects/p00_counter` — it is the reference for how every project should look
+Setup, Git, and the two classic RTL blocks.
 
-**Deliverable:** green CI on GitHub.
+- [ ] Setup: `scripts/setup_wsl.sh`, `make doctor`, `make test` green; repo on GitHub with green CI
+- [ ] Git fluency: branch, commit, push, pull request, merge, rebase, resolve a conflict
+- [ ] Read `projects/p00_counter` end to end; open its waveform
+- [ ] HDLBits sprint: Verilog Language, Combinational, Sequential (FSMs included)
+- [ ] **p01_sync_fifo** — spec given; test plan → RTL → SV tb + cocotb test → bug injection → sign-off
+- [ ] **p02_uart** — TX + RX, parameterized baud, loopback test, write the spec yourself
 
-## Phase 1 — RTL & SystemVerilog foundations (Weeks 2–7)
+**Exit test:** from a blank file, write a FIFO and a UART receiver in SystemVerilog, explain
+full/empty detection and oversampling, and debug an injected bug from a waveform.
 
-Theory: synthesizable SV (`always_ff`/`always_comb`, `logic`, enums, packages), FSM coding styles,
-blocking vs non-blocking, reset strategies, setup/hold, CDC basics. HDLBits: finish "Verilog Language"
-and "Circuits → Sequential Logic".
+## Level 1 — C++ and performance modeling
 
-- [ ] **p01_sync_fifo** — parameterized synchronous FIFO (starter is in the repo)
-  - [ ] Spec + test plan reviewed before any RTL
-  - [ ] Directed SV testbench (`tb/*_tb.sv`) + cocotb test, both self-checking
-  - [ ] Lint-clean with `verilator -Wall`
-- [ ] **p02_uart** — UART TX + RX (8N1, parameterized baud divisor), loopback test
-- [ ] Python track: functions, classes, `dataclasses`, list/dict comprehensions, `pathlib`
+The architect's main tool is a simulator. Build two.
 
-**Deliverable:** two projects, each with spec, test plan, passing regression.
+- [ ] Modern C++ ramp: classes, RAII, STL containers/algorithms, templates basics, CMake, GoogleTest
+- [ ] **p03_cache_sim** — trace-driven cache simulator: size, block size, associativity, LRU/FIFO/random,
+      write-back/write-allocate, multi-level; reports hit rate and AMAT
+- [ ] **p04_branch_pred** — bimodal, gshare, tournament; misprediction rate on real traces
+- [ ] Python analysis: pandas + matplotlib sweeps, one plot per design question
+- [ ] Write-up: "What cache configuration minimizes AMAT for this workload, and why?"
 
-## Phase 2 — Verification with Python / cocotb (Weeks 8–13, incl. exam buffer)
+**Exit test:** given a new replacement policy or predictor, implement it, run a sweep and
+present the result with a plot and a one-paragraph explanation.
 
-Theory: verification planning, stimulus/checker/coverage separation, reference models,
-scoreboards, constrained random, seeds and reproducibility, functional vs code coverage.
+## Level 2 — Verification methodology
 
-- [ ] **p03_alu** — 32-bit ALU; Python golden model; constrained-random stimulus; coverage of every opcode × corner operand
-- [ ] Upgrade p01/p02 tests: random traffic + scoreboard + coverage closure report
-- [ ] Extend `scripts/regress.py`: parallel runs (`--jobs`), per-test timing, HTML or Markdown report
-- [ ] Python track: `argparse`, `subprocess`, `re`, `logging`, `pytest` for the regression script itself
+How industry proves a design works. Applied to the blocks you already built.
 
-**Deliverable:** coverage-driven verification on three blocks; a regression tool you wrote and can talk about.
+- [ ] cocotb: constrained random, reference models, scoreboards, functional coverage closure
+- [ ] Regression engineering: extend `scripts/regress.py` (parallel jobs, report, seeds)
+- [ ] SVA: protocol checkers on FIFO and UART; `|->`, `|=>`, sequences, `$past`
+- [ ] SV OOP + randomization + covergroups; one small UVM environment on EDA Playground
+- [ ] Formal: prove FIFO safety properties with SymbiYosys
 
-## Phase 3 — Industry methodology: SV-OOP, SVA, UVM, Formal (Weeks 14–20)
+**Exit test:** verify a block you did not design (e.g. an arbiter from an open-source repo)
+to coverage closure and find at least one corner case its tests missed.
 
-Theory: SV classes, `rand`/`constraint`, mailboxes, virtual interfaces, covergroups, SVA
-(immediate/concurrent, implication, sequences), UVM (agent/driver/monitor/sequencer/scoreboard/env/test,
-factory, phases, TLM). Book: Spear & Tumbush, *SystemVerilog for Verification*.
+## Level 3 — Build a processor
 
-- [ ] **p04_apb_regs** — APB slave register block
-  - [ ] SVA protocol checker bound to the interface
-  - [ ] Full UVM environment on EDA Playground (commercial simulator, free account); link the playground in the README
-  - [ ] Same block checked with cocotb locally
-- [ ] Formal: prove FIFO properties (never overflow, data order) with SymbiYosys (`sby`)
+- [ ] **p05_rv32i** — single-cycle RV32I (no CSRs), then a 5-stage pipeline with forwarding and hazard detection
+- [ ] **ISS in C++** — instruction-set simulator for the same subset (golden model)
+- [ ] Verilator harness: RTL and ISS in lockstep, compare every retired instruction
+- [ ] Official `riscv-tests` (rv32ui) + Python random instruction generator
+- [ ] Performance counters in RTL: cycles, instructions, stalls by cause → IPC
+- [ ] Write-up: IPC with/without forwarding, with static vs dynamic branch prediction (reuse p04)
 
-**Deliverable:** one block verified three ways (UVM, cocotb, formal) — strong interview material.
+**Exit test:** add a new instruction or a branch predictor to the core, verify it in lockstep,
+and quantify its effect on IPC.
 
-## Phase 4 — Capstone: RV32I core + C++ reference model (Weeks 21–32, incl. exam buffer)
+## Level 4 — Architecture research
 
-- [ ] **p05_rv32i** — single-cycle RV32I (no CSRs), then refactor to a 5-stage pipeline with forwarding and hazard detection
-- [ ] **ISS in C++** — instruction-set simulator for the same subset (your golden model)
-- [ ] Verilator C++ harness that runs RTL and ISS in lockstep and compares retired PC/register writes every instruction
-- [ ] Run the official `riscv-tests` (rv32ui) and a Python random-instruction generator
-- [ ] Coverage: every opcode, every hazard type, branch taken/not-taken
-- [ ] CI runs the full suite on every push; README with block diagram and results
+Work the way architecture researchers and performance teams do.
 
-**Deliverable:** the project that headlines your resume.
+- [ ] ChampSim: build, run SPEC-like traces, read the cache and prefetcher interfaces
+- [ ] Implement a prefetcher (stride → stream → a published one) or a replacement policy (SRRIP/SHiP-style)
+- [ ] Reproduce one figure from a published paper, then propose and test one improvement
+- [ ] gem5 orientation: run a full-system or SE-mode simulation, read the stats
 
-## Phase 5 — Career (Weeks 28–36, overlaps Phase 4)
+**Exit test:** a 2-page report — hypothesis, method, results, limits — that you would be
+comfortable presenting to an architecture team.
 
-- [ ] Update `resume_verification.tex`: Projects section from this repo, coursework list, skills
-- [ ] Polish GitHub: pinned repo, README with diagrams, clean commit history
-- [ ] Interview prep: go through `docs/interview-prep.md`, 2 topics/week, answer out loud
-- [ ] 2 mock interviews (friends in the industry / Technion career center)
-- [ ] Referral list: 10 people in target companies; ask for referrals once the capstone is public
-- [ ] Apply: DV students first, then CAD / Validation / Emulation
+## Level 5 — Advanced microarchitecture
+
+- [ ] Out-of-order core model in C++: register renaming, ROB, issue queue, load/store queue (Tomasulo-style)
+- [ ] Superscalar width and memory-level parallelism studies on the model
+- [ ] Cache coherence: MESI simulator for a small multicore; false-sharing experiments
+- [ ] Memory consistency models: TSO vs relaxed, litmus tests
+
+**Exit test:** explain, with your own model's data, why a wider core stops helping on a given workload.
+
+## Level 6 — Systems and SoC
+
+Where your Linux and boot experience becomes an advantage.
+
+- [ ] On-chip interconnect: AXI4-Lite/AXI4, a crossbar, a DMA engine (RTL + verification)
+- [ ] Integrate a RISC-V SoC (your core or an open one) with memory, UART, timer, interrupts
+- [ ] Boot firmware, then Linux, on a RISC-V SoC in simulation (Verilator) or on an FPGA
+- [ ] HW/SW co-design: a driver for your own peripheral; measure end-to-end latency
+
+**Exit test:** boot to a Linux shell on a system you integrated and explain every step from reset vector to init.
+
+## Level 7 — Frontier (open-ended)
+
+Pick by interest; each can be months deep.
+
+- [ ] Domain-specific accelerators: systolic array for matrix multiply, roofline analysis
+- [ ] Power and energy modeling; performance-per-watt trade-offs
+- [ ] Contributions to open-source hardware/simulators (Verilator, ChampSim, CVA6, cocotb)
+- [ ] Research toward an M.Sc. thesis in computer architecture
 
 ---
 
-## Checkpoints
+## Running alongside every level
 
-| When | Check | If behind |
-|------|-------|-----------|
-| End of Week 7 | p01 + p02 done | Drop p02 RX, keep TX |
-| End of Week 13 | p03 + coverage-driven upgrades | Skip regress.py extensions |
-| End of Week 20 | p04 with UVM + SVA | Skip formal |
-| End of Week 32 | RV32I pipeline passes rv32ui | Ship single-cycle + lockstep; pipeline as "in progress" |
+| Track | What |
+|------|------|
+| Interview prep | `docs/interview-prep.md` — 2 topics a week from Level 1 on |
+| Learning log | `LOG.md` — 3 lines per session |
+| Courses | Prefer advanced computer architecture, VLSI, OS and compilers electives |
+| Career | From ~Jan 2027: resume from this repo, referrals, applications in April |
