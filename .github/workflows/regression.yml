@@ -1,4 +1,5 @@
 name: regression
+run-name: Regression · ${{ github.head_ref || github.ref_name }}
 
 on:
   push:
